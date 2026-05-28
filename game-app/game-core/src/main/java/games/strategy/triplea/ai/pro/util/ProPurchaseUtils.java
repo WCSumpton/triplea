@@ -164,32 +164,38 @@ public final class ProPurchaseUtils {
     purchaseTerritories.values().forEach(ppt -> ppt.setUnitProduction(ppt.getUnitProduction() + 1));
   }
 
-  /** Returns all possible territories within which {@code player} can place purchased units. */
-  public static Map<Territory, ProPurchaseTerritory> findPurchaseTerritories(
+  /**
+   * Returns all possible land territories within which {@code player} can place purchased units.
+   */
+  /** Does not return any sea zones for placement. */
+  public static Map<Territory, ProPurchaseTerritory> findLandOnlyPlacementTerritories(
       final ProData proData, final GamePlayer player) {
 
-    ProLogger.info("Find all purchase territories");
+    ProLogger.info("Find all placement territories");
     final GameData data = proData.getData();
 
     // Find all territories that I can place units on
     final RulesAttachment ra = player.getRulesAttachment();
-    List<Territory> ownedAndNotConqueredFactoryTerritories;
-    if (ra != null && ra.getPlacementAnyTerritory()) {
-      ownedAndNotConqueredFactoryTerritories = data.getMap().getTerritoriesOwnedBy(player);
+    List<Territory> ownedLandTerritoriesMayContainConquered;
+    // If player has rule "placementCapturedTerritory" then all land
+    // territories can be used for placement.
+    if (ra != null && ra.getPlacementCapturedTerritory()) {
+      ownedLandTerritoriesMayContainConquered = data.getMap().getTerritoriesOwnedBy(player);
     } else {
-      ownedAndNotConqueredFactoryTerritories =
+      // Otherwise only those land territories owned at the start of the player's
+      // turn can be used for placement
+      ownedLandTerritoriesMayContainConquered =
           CollectionUtils.getMatches(
-              data.getMap().getTerritories(),
-              ProMatches.territoryHasFactoryAndIsNotConqueredOwnedLand(player));
+              data.getMap().getTerritories(), ProMatches.territoryIsNotConqueredOwnedLand(player));
     }
-    ownedAndNotConqueredFactoryTerritories =
+    ownedLandTerritoriesMayContainConquered =
         CollectionUtils.getMatches(
-            ownedAndNotConqueredFactoryTerritories,
+            ownedLandTerritoriesMayContainConquered,
             ProMatches.territoryCanMoveLandUnits(player, false));
 
     // Create purchase territory holder for each factory territory
     final Map<Territory, ProPurchaseTerritory> purchaseTerritories = new HashMap<>();
-    for (final Territory t : ownedAndNotConqueredFactoryTerritories) {
+    for (final Territory t : ownedLandTerritoriesMayContainConquered) {
       final int unitProduction = getUnitProduction(t, player);
       final ProPurchaseTerritory ppt = new ProPurchaseTerritory(t, data, player, unitProduction);
       purchaseTerritories.put(t, ppt);

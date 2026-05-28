@@ -20,7 +20,6 @@ import games.strategy.triplea.ai.pro.logging.ProLogger;
 import games.strategy.triplea.ai.pro.simulate.ProDummyDelegateBridge;
 import games.strategy.triplea.ai.pro.simulate.ProSimulateTurnUtils;
 import games.strategy.triplea.ai.pro.util.ProBattleUtils;
-import games.strategy.triplea.ai.pro.util.ProMatches;
 import games.strategy.triplea.ai.pro.util.ProOddsCalculator;
 import games.strategy.triplea.ai.pro.util.ProPurchaseUtils;
 import games.strategy.triplea.ai.pro.util.ProTransportUtils;
@@ -48,7 +47,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.Getter;
-import org.triplea.java.collections.CollectionUtils;
 import org.triplea.util.Tuple;
 
 /** Pro AI. */
@@ -175,12 +173,8 @@ public abstract class AbstractProAi extends AbstractAi {
 
       // Check if any place territories exist
       final Map<Territory, ProPurchaseTerritory> purchaseTerritories =
-          ProPurchaseUtils.findPurchaseTerritories(proData, player);
-      final List<Territory> possibleFactoryTerritories =
-          CollectionUtils.getMatches(
-              data.getMap().getTerritories(),
-              ProMatches.territoryHasNoInfraFactoryAndIsNotConqueredOwnedLand(player));
-      if (purchaseTerritories.isEmpty() && possibleFactoryTerritories.isEmpty()) {
+          ProPurchaseUtils.findLandOnlyPlacementTerritories(proData, player);
+      if (purchaseTerritories.isEmpty()) {
         ProLogger.info("No possible place or factory territories owned so exiting purchase logic");
         return;
       }

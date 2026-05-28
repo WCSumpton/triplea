@@ -277,8 +277,11 @@ class ProPurchaseAi {
     }
 
     // Find all purchase/place territories
+    // purchaseTerritories contains only land, including conquered, territories
+    // placeTerritories includes both land, including conquered, territories and
+    // only those sea zones that are adjacent to factories
     final Map<Territory, ProPurchaseTerritory> purchaseTerritories =
-        ProPurchaseUtils.findPurchaseTerritories(proData, player);
+        ProPurchaseUtils.findLandOnlyPlacementTerritories(proData, player);
     final Set<Territory> placeTerritories =
         new HashSet<>(
             CollectionUtils.getMatches(
@@ -476,9 +479,9 @@ class ProPurchaseAi {
     // Current data at the start of place
     ProLogger.debug("Remaining units to place: " + player.getUnits());
 
-    // Find all place territories
+    // Find all place territories, including sea zones adjacent to factories
     final Map<Territory, ProPurchaseTerritory> placeNonConstructionTerritories =
-        ProPurchaseUtils.findPurchaseTerritories(proData, player);
+        ProPurchaseUtils.findLandOnlyPlacementTerritories(proData, player);
     final Set<Territory> placeTerritories = new HashSet<>();
     for (final Territory t : placeNonConstructionTerritories.keySet()) {
       for (final ProPlaceTerritory ppt :
